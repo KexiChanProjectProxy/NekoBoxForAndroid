@@ -168,6 +168,21 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var globalAllowInsecure by configurationStore.boolean(Key.GLOBAL_ALLOW_INSECURE) { false }
 
+    // AnyTLS session pool: durations use sing-box syntax ("30s", "5m"), blank = sing-box default / disabled;
+    // counts <= 0 = sing-box default
+    var anytlsSessionTuning by configurationStore.boolean(Key.ANYTLS_SESSION_TUNING) { true }
+    var anytlsIdleSessionCheckInterval by configurationStore.string(Key.ANYTLS_IDLE_SESSION_CHECK_INTERVAL) { "30s" }
+    var anytlsIdleSessionTimeout by configurationStore.string(Key.ANYTLS_IDLE_SESSION_TIMEOUT) { "30s" }
+    var anytlsMinIdleSession by configurationStore.stringToInt(Key.ANYTLS_MIN_IDLE_SESSION) { 5 }
+    var anytlsEnsureIdleSession by configurationStore.stringToInt(Key.ANYTLS_ENSURE_IDLE_SESSION) { 10 }
+    var anytlsEnsureIdleSessionCreateRate by configurationStore.stringToInt(Key.ANYTLS_ENSURE_IDLE_SESSION_CREATE_RATE) { 5 }
+    var anytlsHeartbeat by configurationStore.string(Key.ANYTLS_HEARTBEAT) { "30s" }
+    var anytlsMinIdleSessionForAge by configurationStore.stringToInt(Key.ANYTLS_MIN_IDLE_SESSION_FOR_AGE) { 2 }
+    var anytlsMaxConnectionLifetime by configurationStore.string(Key.ANYTLS_MAX_CONNECTION_LIFETIME) { "300s" }
+    var anytlsConnectionLifetimeJitter by configurationStore.string(Key.ANYTLS_CONNECTION_LIFETIME_JITTER) { "10s" }
+    var anytlsCloseAfterIdle by configurationStore.string(Key.ANYTLS_CLOSE_AFTER_IDLE) { "5m" }
+    var anytlsCloseAfterLifetime by configurationStore.string(Key.ANYTLS_CLOSE_AFTER_LIFETIME) { "30m" }
+
     // old cache, DO NOT ADD
 
     var dirty by profileCacheStore.boolean(Key.PROFILE_DIRTY)

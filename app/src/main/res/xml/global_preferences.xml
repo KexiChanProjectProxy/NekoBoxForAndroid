@@ -206,6 +206,70 @@
             app:title="@string/allow_access" />
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/cag_anytls">
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="anytlsSessionTuning"
+            app:summary="@string/anytls_session_tuning_summary"
+            app:title="@string/anytls_session_tuning" />
+        <EditTextPreference
+            app:defaultValue="30s"
+            app:key="anytlsIdleSessionCheckInterval"
+            app:title="@string/anytls_idle_session_check_interval"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="30s"
+            app:key="anytlsIdleSessionTimeout"
+            app:title="@string/anytls_idle_session_timeout"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="5"
+            app:key="anytlsMinIdleSession"
+            app:title="@string/anytls_min_idle_session"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="10"
+            app:key="anytlsEnsureIdleSession"
+            app:title="@string/anytls_ensure_idle_session"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="5"
+            app:key="anytlsEnsureIdleSessionCreateRate"
+            app:title="@string/anytls_ensure_idle_session_create_rate"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="30s"
+            app:key="anytlsHeartbeat"
+            app:title="@string/anytls_heartbeat"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="2"
+            app:key="anytlsMinIdleSessionForAge"
+            app:title="@string/anytls_min_idle_session_for_age"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="300s"
+            app:key="anytlsMaxConnectionLifetime"
+            app:title="@string/anytls_max_connection_lifetime"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="10s"
+            app:key="anytlsConnectionLifetimeJitter"
+            app:title="@string/anytls_connection_lifetime_jitter"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="5m"
+            app:key="anytlsCloseAfterIdle"
+            app:title="@string/anytls_close_after_idle"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="30m"
+            app:key="anytlsCloseAfterLifetime"
+            app:title="@string/anytls_close_after_lifetime"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/cag_misc">
         <moe.matsuri.nb4a.ui.UrlTestPreference
             app:defaultValue="http://cp.cloudflare.com/"

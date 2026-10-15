@@ -113,6 +113,8 @@ public class SingBoxOptions {
 
         public List<SingBoxOption> outbounds;
 
+        public List<SingBoxOption> endpoints;
+
         public RouteOptions route;
 
         public ExperimentalOptions experimental;
@@ -312,8 +314,6 @@ public class SingBoxOptions {
 
         public Boolean reverse_mapping;
 
-        public DNSFakeIPOptions fakeip;
-
         // Generate note: nested type DNSClientOptions
         public String strategy;
 
@@ -321,27 +321,46 @@ public class SingBoxOptions {
 
         public Boolean disable_expire;
 
-        public Boolean independent_cache;
-
         // End of public DNSClientOptions ;
 
     }
 
+    // sing-box 1.12+ typed DNS server (legacy "address" format is removed in 1.14)
     public static class DNSServerOptions extends SingBoxOption {
+
+        public String type;
 
         public String tag;
 
-        public String address;
+        // remote servers
+        public String server;
 
-        public String address_resolver;
+        public Integer server_port;
 
-        public String address_strategy;
+        // https / h3
+        public String path;
 
-        public Long address_fallback_delay;
+        // dhcp
+        @SerializedName("interface")
+        public String interface_;
+
+        // fakeip
+        public String inet4_range;
+
+        public String inet6_range;
+
+        // Dial Fields
+        public String detour;
+
+        public String domain_resolver;
+
+    }
+
+    public static class DomainResolveOptions extends SingBoxOption {
+
+        public String server;
 
         public String strategy;
-
-        public String detour;
 
     }
 
@@ -1062,6 +1081,8 @@ public class SingBoxOptions {
         public String default_interface;
 
         public Integer default_mark;
+
+        public DomainResolveOptions default_domain_resolver;
 
     }
 
@@ -2804,6 +2825,8 @@ public class SingBoxOptions {
         public Integer mtu;
 
         // Generate note: Listable
+        public List<String> address;
+
         public List<String> inet4_address;
 
         // Generate note: Listable
@@ -4456,6 +4479,9 @@ public class SingBoxOptions {
 
         public String outbound;
 
+        // resolve action
+        public String strategy;
+
     }
 
     public static class DNSRule_DefaultOptions extends DNSRule {
@@ -4527,6 +4553,12 @@ public class SingBoxOptions {
         public String clash_mode;
 
         public Boolean invert;
+
+        public String action;
+
+        public String rcode;
+
+        public String strategy;
 
         public String server;
 
@@ -4638,6 +4670,61 @@ public class SingBoxOptions {
         public String idle_session_check_interval;
 
         public String idle_session_timeout;
+
+        public Integer min_idle_session;
+
+        public Integer ensure_idle_session;
+
+        public Integer ensure_idle_session_create_rate;
+
+        public Integer min_idle_session_for_age;
+
+        public String heartbeat;
+
+        public String max_connection_lifetime;
+
+        public String connection_lifetime_jitter;
+
+        public String close_after_idle;
+
+        public String close_after_lifetime;
+
+    }
+
+    // sing-box 1.11+ WireGuard endpoint (WireGuard outbound is removed in 1.13)
+    public static class Endpoint_WireGuardOptions extends SingBoxOption {
+
+        public String type;
+
+        public String tag;
+
+        public Integer mtu;
+
+        public List<String> address;
+
+        public String private_key;
+
+        public List<Endpoint_WireGuardPeer> peers;
+
+        // Dial Fields
+        public String detour;
+
+    }
+
+    public static class Endpoint_WireGuardPeer extends SingBoxOption {
+
+        public String address;
+
+        public Integer port;
+
+        public String public_key;
+
+        public String pre_shared_key;
+
+        public List<String> allowed_ips;
+
+        // base64 or [a,b,c]
+        public String reserved;
 
     }
 

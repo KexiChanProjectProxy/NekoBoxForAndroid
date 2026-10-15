@@ -168,6 +168,38 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         tunImplementation.onPreferenceChangeListener = reloadListener
         acquireWakeLock.onPreferenceChangeListener = reloadListener
         globalCustomConfig.onPreferenceChangeListener = reloadListener
+
+        // AnyTLS session pool
+        val anytlsSessionTuning = findPreference<SwitchPreference>(Key.ANYTLS_SESSION_TUNING)!!
+        val anytlsDurationKeys = listOf(
+            Key.ANYTLS_IDLE_SESSION_CHECK_INTERVAL,
+            Key.ANYTLS_IDLE_SESSION_TIMEOUT,
+            Key.ANYTLS_HEARTBEAT,
+            Key.ANYTLS_MAX_CONNECTION_LIFETIME,
+            Key.ANYTLS_CONNECTION_LIFETIME_JITTER,
+            Key.ANYTLS_CLOSE_AFTER_IDLE,
+            Key.ANYTLS_CLOSE_AFTER_LIFETIME,
+        )
+        val anytlsCountKeys = listOf(
+            Key.ANYTLS_MIN_IDLE_SESSION,
+            Key.ANYTLS_ENSURE_IDLE_SESSION,
+            Key.ANYTLS_ENSURE_IDLE_SESSION_CREATE_RATE,
+            Key.ANYTLS_MIN_IDLE_SESSION_FOR_AGE,
+        )
+        val anytlsPrefs = (anytlsDurationKeys + anytlsCountKeys).map {
+            findPreference<EditTextPreference>(it)!!.apply {
+                onPreferenceChangeListener = reloadListener
+                isEnabled = anytlsSessionTuning.isChecked
+            }
+        }
+        anytlsCountKeys.forEach {
+            findPreference<EditTextPreference>(it)!!.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+        }
+        anytlsSessionTuning.setOnPreferenceChangeListener { _, newValue ->
+            anytlsPrefs.forEach { it.isEnabled = newValue as Boolean }
+            needReload()
+            true
+        }
     }
 
     override fun onResume() {

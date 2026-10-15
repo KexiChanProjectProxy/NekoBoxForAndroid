@@ -8,10 +8,11 @@ pushd ..
 
 ####
 
-if [ ! -d "sing-box" ]; then
-  git clone --no-checkout https://github.com/MatsuriDayo/sing-box.git
+if [ ! -d "sing-box-nekobox" ]; then
+  git clone --no-checkout https://github.com/KexiChanProjectProxy/sing-box-nekobox.git
 fi
-pushd sing-box
+pushd sing-box-nekobox
+git fetch origin || true
 git checkout "$COMMIT_SING_BOX"
 popd
 

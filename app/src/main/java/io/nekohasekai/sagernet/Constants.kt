@@ -56,6 +56,20 @@ object Key {
     // Protocol Settings
     const val GLOBAL_ALLOW_INSECURE = "globalAllowInsecure"
 
+    // AnyTLS session pool (applies to all AnyTLS outbounds)
+    const val ANYTLS_SESSION_TUNING = "anytlsSessionTuning"
+    const val ANYTLS_IDLE_SESSION_CHECK_INTERVAL = "anytlsIdleSessionCheckInterval"
+    const val ANYTLS_IDLE_SESSION_TIMEOUT = "anytlsIdleSessionTimeout"
+    const val ANYTLS_MIN_IDLE_SESSION = "anytlsMinIdleSession"
+    const val ANYTLS_ENSURE_IDLE_SESSION = "anytlsEnsureIdleSession"
+    const val ANYTLS_ENSURE_IDLE_SESSION_CREATE_RATE = "anytlsEnsureIdleSessionCreateRate"
+    const val ANYTLS_HEARTBEAT = "anytlsHeartbeat"
+    const val ANYTLS_MIN_IDLE_SESSION_FOR_AGE = "anytlsMinIdleSessionForAge"
+    const val ANYTLS_MAX_CONNECTION_LIFETIME = "anytlsMaxConnectionLifetime"
+    const val ANYTLS_CONNECTION_LIFETIME_JITTER = "anytlsConnectionLifetimeJitter"
+    const val ANYTLS_CLOSE_AFTER_IDLE = "anytlsCloseAfterIdle"
+    const val ANYTLS_CLOSE_AFTER_LIFETIME = "anytlsCloseAfterLifetime"
+
     const val ACQUIRE_WAKE_LOCK = "acquireWakeLock"
     const val SHOW_BOTTOM_BAR = "showBottomBar"
 

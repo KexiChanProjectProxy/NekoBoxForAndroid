@@ -499,4 +499,18 @@
     <string name="minimize">最小化</string>
     <string name="app_list_permission_denied">无法读取已安装的应用。\n这通常是由于系统限制了应用的读取权限（例如某些中国厂商系统）。\n请在系统设置中授予权限。</string>
     <string name="open_app_settings">打开系统设置</string>
+    <string name="cag_anytls">AnyTLS 会话池</string>
+    <string name="anytls_session_tuning">启用会话池优化</string>
+    <string name="anytls_session_tuning_summary">将以下选项应用于所有 AnyTLS 配置。时长使用 sing-box 格式（30s、5m）；留空则使用内核默认值或关闭。</string>
+    <string name="anytls_idle_session_check_interval">空闲会话检查间隔</string>
+    <string name="anytls_idle_session_timeout">空闲会话超时</string>
+    <string name="anytls_min_idle_session">最少保留空闲会话数</string>
+    <string name="anytls_ensure_idle_session">预建空闲会话数</string>
+    <string name="anytls_ensure_idle_session_create_rate">每次检查最多新建会话数</string>
+    <string name="anytls_heartbeat">心跳间隔</string>
+    <string name="anytls_min_idle_session_for_age">到期时最少保留空闲会话数</string>
+    <string name="anytls_max_connection_lifetime">会话最大存活时间</string>
+    <string name="anytls_connection_lifetime_jitter">会话存活时间抖动</string>
+    <string name="anytls_close_after_idle">空闲超过此时长后淘汰会话</string>
+    <string name="anytls_close_after_lifetime">存活超过此时长后淘汰会话</string>
 </resources>

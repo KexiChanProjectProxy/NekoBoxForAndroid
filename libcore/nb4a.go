@@ -44,7 +44,7 @@ func InitCore(process, cachePath, internalAssets, externalAssets string,
 	intfNB4A = if1
 	intfBox = if2
 	useProcfs = intfBox.UseProcFS()
-	gLocalDNSTransport = newPlatformTransport(if3, "", option.LocalDNSServerOptions{})
+	gLocalDNSTransport, _ = newPlatformTransport(nil, nil, if3, "", option.LocalDNSServerOptions{})
 
 	// Working dir
 	tmp := filepath.Join(cachePath, "../no_backup")

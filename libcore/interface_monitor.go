@@ -8,7 +8,9 @@ import (
 
 // wtf
 
-type interfaceMonitorStub struct{}
+type interfaceMonitorStub struct {
+	myInterfaces []string
+}
 
 func (s *interfaceMonitorStub) Start() error {
 	return nil
@@ -38,8 +40,9 @@ func (s *interfaceMonitorStub) UnregisterCallback(element *list.Element[tun.Defa
 }
 
 func (s *interfaceMonitorStub) RegisterMyInterface(interfaceName string) {
+	s.myInterfaces = append(s.myInterfaces, interfaceName)
 }
 
-func (s *interfaceMonitorStub) MyInterface() string {
-	return ""
+func (s *interfaceMonitorStub) MyInterfaces() []string {
+	return s.myInterfaces
 }

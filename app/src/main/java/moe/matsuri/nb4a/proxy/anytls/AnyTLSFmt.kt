@@ -1,5 +1,6 @@
 package moe.matsuri.nb4a.proxy.anytls
 
+import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.blankAsNull
 import io.nekohasekai.sagernet.ktx.linkBuilder
 import io.nekohasekai.sagernet.ktx.toLink
@@ -14,6 +15,7 @@ fun buildSingBoxOutboundAnyTLSBean(bean: AnyTLSBean): SingBoxOptions.Outbound_An
         server = bean.serverAddress
         server_port = bean.serverPort
         password = bean.password
+        applyAnyTLSSessionTuning()
 
         tls = SingBoxOptions.OutboundTLSOptions().apply {
             enabled = true
@@ -38,6 +40,24 @@ fun buildSingBoxOutboundAnyTLSBean(bean: AnyTLSBean): SingBoxOptions.Outbound_An
             }
         }
     }
+}
+
+/** Global AnyTLS session pool options from Settings (sing-box-nekobox). */
+fun SingBoxOptions.Outbound_AnyTLSOptions.applyAnyTLSSessionTuning() {
+    if (!DataStore.anytlsSessionTuning) return
+    fun duration(v: String) = v.trim().blankAsNull()
+    fun count(v: Int) = v.takeIf { it > 0 }
+    idle_session_check_interval = duration(DataStore.anytlsIdleSessionCheckInterval)
+    idle_session_timeout = duration(DataStore.anytlsIdleSessionTimeout)
+    min_idle_session = count(DataStore.anytlsMinIdleSession)
+    ensure_idle_session = count(DataStore.anytlsEnsureIdleSession)
+    ensure_idle_session_create_rate = count(DataStore.anytlsEnsureIdleSessionCreateRate)
+    heartbeat = duration(DataStore.anytlsHeartbeat)
+    min_idle_session_for_age = count(DataStore.anytlsMinIdleSessionForAge)
+    max_connection_lifetime = duration(DataStore.anytlsMaxConnectionLifetime)
+    connection_lifetime_jitter = duration(DataStore.anytlsConnectionLifetimeJitter)
+    close_after_idle = duration(DataStore.anytlsCloseAfterIdle)
+    close_after_lifetime = duration(DataStore.anytlsCloseAfterLifetime)
 }
 
 fun AnyTLSBean.toUri(): String {

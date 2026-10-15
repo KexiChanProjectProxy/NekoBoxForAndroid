@@ -12,6 +12,8 @@ import (
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/dns"
+	"github.com/sagernet/sing-box/dns/transport/local"
+	"github.com/sagernet/sing-box/log"
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common"
 	E "github.com/sagernet/sing/common/exceptions"
@@ -32,21 +34,41 @@ type LocalDNSTransport interface {
 
 var gLocalDNSTransport *platformLocalDNSTransport = nil
 
+var (
+	_ adapter.DNSTransport                    = (*platformLocalDNSTransport)(nil)
+	_ adapter.DNSTransportWithPreferredDomain = (*platformLocalDNSTransport)(nil)
+)
+
 type platformLocalDNSTransport struct {
 	dns.TransportAdapter
-	iif LocalDNSTransport
-	raw bool
+	iif               LocalDNSTransport
+	raw               bool
+	preferredResolver *local.PreferredDomainResolver
 }
 
-func newPlatformTransport(iif LocalDNSTransport, tag string, options option.LocalDNSServerOptions) *platformLocalDNSTransport {
-	return &platformLocalDNSTransport{
+// newPlatformTransport creates the Android local DNS transport.
+// logger may be nil (global instance used outside of a box), in which case the
+// preferred domain resolver (hosts / neighbor lookups) is disabled.
+func newPlatformTransport(ctx context.Context, logger log.ContextLogger, iif LocalDNSTransport, tag string, options option.LocalDNSServerOptions) (*platformLocalDNSTransport, error) {
+	transport := &platformLocalDNSTransport{
 		TransportAdapter: dns.NewTransportAdapterWithLocalOptions(constant.DNSTypeLocal, tag, options),
 		iif:              iif,
 		raw:              iif.Raw(),
 	}
+	if ctx != nil && logger != nil {
+		preferredResolver, err := local.NewPreferredDomainResolver(ctx, logger, options)
+		if err != nil {
+			return nil, err
+		}
+		transport.preferredResolver = preferredResolver
+	}
+	return transport, nil
 }
 
 func (p *platformLocalDNSTransport) Start(stage adapter.StartStage) error {
+	if p.preferredResolver != nil {
+		p.preferredResolver.Start(stage)
+	}
 	return nil
 }
 
@@ -54,7 +76,28 @@ func (p *platformLocalDNSTransport) Close() error {
 	return nil
 }
 
+func (p *platformLocalDNSTransport) Reset() {
+}
+
+func (p *platformLocalDNSTransport) PreferredDomain(domain string) bool {
+	if p.preferredResolver == nil {
+		return false
+	}
+	return p.preferredResolver.PreferredDomain(domain)
+}
+
+func (p *platformLocalDNSTransport) ExchangeAsync(ctx context.Context, message *mDNS.Msg, callback func(response *mDNS.Msg, err error)) {
+	go func() {
+		callback(p.Exchange(ctx, message))
+	}()
+}
+
 func (p *platformLocalDNSTransport) Exchange(ctx context.Context, message *mDNS.Msg) (*mDNS.Msg, error) {
+	if p.preferredResolver != nil {
+		if localResponse := p.preferredResolver.Lookup(message); localResponse != nil {
+			return localResponse, nil
+		}
+	}
 	if p.raw && rawQueryFunc != nil {
 		// Raw - Android 10 及以上才有
 

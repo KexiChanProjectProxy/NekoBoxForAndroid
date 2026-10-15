@@ -579,4 +579,18 @@
     <string name="minimize">Minimize</string>
     <string name="app_list_permission_denied">Unable to read installed apps.\nThis is usually because the system has restricted app read permissions.\nPlease grant permissions in the system settings.</string>
     <string name="open_app_settings">Open System Settings</string>
+    <string name="cag_anytls">AnyTLS Session Pool</string>
+    <string name="anytls_session_tuning">Enable session pool tuning</string>
+    <string name="anytls_session_tuning_summary">Apply the options below to every AnyTLS profile. Durations use sing-box syntax (30s, 5m); leave blank to use the core default or disable.</string>
+    <string name="anytls_idle_session_check_interval">Idle session check interval</string>
+    <string name="anytls_idle_session_timeout">Idle session timeout</string>
+    <string name="anytls_min_idle_session">Minimum idle sessions</string>
+    <string name="anytls_ensure_idle_session">Pre-created idle sessions</string>
+    <string name="anytls_ensure_idle_session_create_rate">Idle session creation rate (per check)</string>
+    <string name="anytls_heartbeat">Heartbeat interval</string>
+    <string name="anytls_min_idle_session_for_age">Minimum idle sessions kept on expiry</string>
+    <string name="anytls_max_connection_lifetime">Maximum session lifetime</string>
+    <string name="anytls_connection_lifetime_jitter">Session lifetime jitter</string>
+    <string name="anytls_close_after_idle">Retire sessions idle longer than</string>
+    <string name="anytls_close_after_lifetime">Retire sessions older than</string>
 </resources>
