@@ -1,16 +1,33 @@
 name: Release Build
 on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release Tag"
-        required: true
+        description: "Release Tag (default: <VERSION_NAME>-kexi.<run number>)"
+        required: false
       publish:
         description: "Publish: If want ignore"
         required: false
       play:
         description: "Play: If want ignore"
         required: false
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  NDK_VERSION: 25.0.8775105
+
 jobs:
   libcore:
     name: Native Build (LibCore)
@@ -34,6 +51,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ^1.25
+      - name: Install NDK
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;${NDK_VERSION}" > /dev/null
       - name: Native Build
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./run lib core
@@ -42,9 +62,21 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - libcore
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Release Tag
+        id: tag
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            VERSION=$(grep '^VERSION_NAME=' nb4a.properties | cut -d= -f2)
+            TAG="${VERSION}-kexi.${{ github.run_number }}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $TAG"
       - name: Golang Status
         run: find buildScript libcore/*.sh | xargs cat | sha1sum > golang_status
       - name: Libcore Status
@@ -60,6 +92,8 @@ jobs:
         with:
           path: ~/.gradle
           key: gradle-oss-${{ hashFiles('**/*.gradle.kts') }}
+      - name: Install NDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;${NDK_VERSION}" > /dev/null
       - name: Gradle Build
         env:
           BUILD_PLUGIN: none
@@ -67,12 +101,14 @@ jobs:
           ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
           ALIAS_PASS: ${{ secrets.ALIAS_PASS }}
         run: |
+          if [ -z "$KEYSTORE_PASS" ]; then echo "::error::signing secrets missing"; exit 1; fi
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
-          echo "ndk.dir=${ANDROID_HOME}/ndk/25.0.8775105" >> local.properties
+          echo "ndk.dir=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> local.properties
           export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
           ./run init action gradle
           ./gradlew app:assembleOssRelease
+          rm -f release.keystore
           APK=$(find app/build/outputs/apk -name '*arm64-v8a*.apk')
           APK=$(dirname $APK)
           echo "APK=$APK" >> $GITHUB_ENV
@@ -94,16 +130,21 @@ jobs:
           name: APKs
           path: artifacts
       - name: Release
+        env:
+          TAG: ${{ needs.build.outputs.tag }}
         run: |
-          wget -O ghr.tar.gz https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
-          tar -xvf ghr.tar.gz
+          wget -q -O ghr.tar.gz https://github.com/tcnksm/ghr/releases/download/v0.13.0/ghr_v0.13.0_linux_amd64.tar.gz
+          tar -xf ghr.tar.gz
           mv ghr*linux_amd64/ghr .
           mkdir apks
           find artifacts -name "*.apk" -exec cp {} apks \;
-          ./ghr -delete -c "${{ github.sha }}" -t "${{ github.token }}" -n "${{ github.event.inputs.tag }}" "${{ github.event.inputs.tag }}" apks
+          (cd apks && sha256sum *.apk > SHA256SUMS.txt)
+          ./ghr -delete -c "${{ github.sha }}" -t "${{ github.token }}" -n "$TAG" \
+            -b "Automated signed build of ${{ github.sha }} (sing-box-nekobox core)." \
+            "$TAG" apks
   play:
     name: Build Play Bundle
-    if: github.event.inputs.play != 'y'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.play != 'y'
     runs-on: ubuntu-latest
     needs:
       - libcore
@@ -125,9 +166,8 @@ jobs:
         with:
           path: ~/.gradle
           key: gradle-play-${{ hashFiles('**/*.gradle.kts') }}
-      - name: Checkout Library
-        run: |
-          git submodule update --init 'app/*'
+      - name: Install NDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;${NDK_VERSION}" > /dev/null
       - name: Gradle Build
         env:
           KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
@@ -136,11 +176,12 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
-          echo "ndk.dir=${ANDROID_HOME}/ndk/25.0.8775105" >> local.properties
+          echo "ndk.dir=${ANDROID_HOME}/ndk/${NDK_VERSION}" >> local.properties
           export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
           ./run init action gradle
           ./gradlew bundlePlayRelease
-      - uses: actions/upload-artifact@v3
+          rm -f release.keystore
+      - uses: actions/upload-artifact@v4
         with:
           name: AAB
           path: app/build/outputs/bundle/playRelease/app-play-release.aab
