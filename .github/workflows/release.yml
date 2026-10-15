@@ -63,7 +63,11 @@ jobs:
       - name: Gradle Build
         env:
           BUILD_PLUGIN: none
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
+          ALIAS_PASS: ${{ secrets.ALIAS_PASS }}
         run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
           echo "ndk.dir=${ANDROID_HOME}/ndk/25.0.8775105" >> local.properties
           export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
@@ -96,7 +100,7 @@ jobs:
           mv ghr*linux_amd64/ghr .
           mkdir apks
           find artifacts -name "*.apk" -exec cp {} apks \;
-          ./ghr -delete -t "${{ github.token }}" -n "${{ github.event.inputs.tag }}" "${{ github.event.inputs.tag }}" apks
+          ./ghr -delete -c "${{ github.sha }}" -t "${{ github.token }}" -n "${{ github.event.inputs.tag }}" "${{ github.event.inputs.tag }}" apks
   play:
     name: Build Play Bundle
     if: github.event.inputs.play != 'y'
@@ -125,7 +129,12 @@ jobs:
         run: |
           git submodule update --init 'app/*'
       - name: Gradle Build
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
+          ALIAS_PASS: ${{ secrets.ALIAS_PASS }}
         run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
           echo "ndk.dir=${ANDROID_HOME}/ndk/25.0.8775105" >> local.properties
           export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
